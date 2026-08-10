@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>발음 반사거울 — 초등 영어</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg:#EFF6FF; --card:#ffffff; --ink:#1E2A4A; --muted:#6B7CA0;
+    --a1:#6BB6FF; --a2:#FF8B6B; --a3:#FFD166; --good:#2E9E6B; --bad:#E0663F;
+    --font-display:'Baloo 2',sans-serif; --font-body:'PretendardVariable',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:22px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body);
+    background-image: radial-gradient(circle at 85% 5%, rgba(107,182,255,0.18), transparent 45%); }
+  .wrap{ max-width:520px; margin:0 auto; padding:20px 18px 60px; }
+  @media(min-width:900px){ .wrap{ max-width:640px; padding-top:40px; } }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; }
+  .back{
+    font-family:var(--font-mono); font-size:12.5px; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; background:#fff;
+    box-shadow: 0 2px 0 rgba(30,42,74,0.06);
+  }
+  .badge{ font-family:var(--font-mono); font-size:11px; background:var(--a1); color:#0C2C4D; padding:6px 12px; border-radius:999px; font-weight:700; }
+
+  h1{ font-family:var(--font-display); font-size: clamp(28px,6.5vw,38px); margin: 8px 0 6px; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom: 26px; }
+
+  .stage{ background:var(--card); border-radius:var(--radius); padding: 28px 22px; text-align:center; box-shadow: 0 10px 0 rgba(30,42,74,0.05); }
+  .word{ font-family:var(--font-display); font-size: clamp(40px,11vw,58px); color:var(--ink); }
+  .phonetic{ font-family:var(--font-mono); color:var(--muted); font-size:14px; margin-top:6px; }
+  .kor{ color:var(--muted); font-size:14px; margin-top: 4px; }
+
+  canvas{ width:100%; height:80px; margin-top:22px; border-radius:14px; background:#F3F7FF; }
+
+  .btn-row{ display:flex; gap:12px; justify-content:center; margin-top: 22px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--font-body); font-weight:700; font-size:15px; padding: 14px 24px; border-radius:999px; border:none; cursor:pointer;
+  }
+  .btn-mic{ background:var(--a1); color:#0C2C4D; }
+  .btn-mic.recording{ background:var(--bad); color:#fff; }
+  .btn-play{ background:#F3F7FF; color:var(--ink); }
+
+  .score-wrap{ margin-top:26px; }
+  .score-num{ font-family:var(--font-display); font-size:40px; }
+  .score-num.good{ color:var(--good); } .score-num.bad{ color:var(--bad); } .score-num.mid{ color:var(--a3); }
+  .heard{ font-family:var(--font-mono); font-size:13px; color:var(--muted); margin-top:6px; }
+
+  .nav-btns{ display:flex; justify-content:center; gap:10px; margin-top:26px; }
+  .nav-btn{ font-family:var(--font-mono); font-size:12.5px; padding:9px 16px; border-radius:999px; border:1px solid #E1E9F5; background:#fff; color:var(--muted); cursor:pointer; }
+  .nav-btn:hover{ border-color:var(--a1); color:var(--a1); }
+
+  .unsupported{ background:#FFF6E9; border:1px solid #F3DDA8; color:#7A5A16; border-radius:14px; padding:14px 18px; font-size:13px; margin-top:18px; display:none; }
+
+  .explain{ margin-top:28px; background:var(--card); border-radius:var(--radius); padding:18px 20px; }
+  .explain h3{ margin:0 0 8px; font-size:13px; font-family:var(--font-mono); color:var(--a1); }
+  .explain p{ margin:0; font-size:13px; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="../portfolio.html">← 메인으로</a>
+      <span class="badge">초등 5~6학년 · 영어</span>
+    </div>
+
+    <h1>발음 반사거울 🎤</h1>
+    <p class="sub">단어를 듣고 따라 말해보세요. 마이크가 발음을 인식해 정확도를 점수로 알려줘요.</p>
+
+    <div class="stage">
+      <div class="word" id="word">apple</div>
+      <div class="phonetic" id="phonetic">/ˈæp.əl/</div>
+      <div class="kor" id="kor">사과</div>
+
+      <canvas id="wave" width="600" height="160"></canvas>
+
+      <div class="btn-row">
+        <button class="btn btn-play" id="playBtn">🔊 원어민 발음 듣기</button>
+        <button class="btn btn-mic" id="micBtn">🎙️ 따라 말하기</button>
+      </div>
+
+      <div class="unsupported" id="unsupported">이 브라우저는 음성 인식을 지원하지 않아요. Chrome 브라우저에서 열어보세요.</div>
+
+      <div class="score-wrap" id="scoreWrap" style="display:none;">
+        <div class="score-num" id="scoreNum">0%</div>
+        <div class="heard" id="heard"></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="nav-btn" id="prevBtn">← 이전 단어</button>
+      <button class="nav-btn" id="nextBtn">다음 단어 →</button>
+    </div>
+
+    <div class="explain">
+      <h3>✦ AI 활용 방식</h3>
+      <p>브라우저의 음성 인식(Web Speech API)이 학생의 발음을 텍스트로 변환하고, 목표 단어와 문자열 유사도를 비교해 점수를 계산합니다. 실제 발음 평가 서비스는 여기에 음소 단위 분석 모델을 더해 억양·강세까지 정밀하게 채점합니다.</p>
+    </div>
+  </div>
+
+<script>
+  const words = [
+    { text:'apple', phonetic:'/ˈæp.əl/', kor:'사과' },
+    { text:'banana', phonetic:'/bəˈnæn.ə/', kor:'바나나' },
+    { text:'elephant', phonetic:'/ˈel.ɪ.fənt/', kor:'코끼리' },
+    { text:'butterfly', phonetic:'/ˈbʌt.ə.flaɪ/', kor:'나비' },
+    { text:'umbrella', phonetic:'/ʌmˈbrel.ə/', kor:'우산' }
+  ];
+  let wIdx = 0;
+
+  const wordEl = document.getElementById('word');
+  const phoneticEl = document.getElementById('phonetic');
+  const korEl = document.getElementById('kor');
+  const scoreWrap = document.getElementById('scoreWrap');
+  const scoreNum = document.getElementById('scoreNum');
+  const heardEl = document.getElementById('heard');
+  const micBtn = document.getElementById('micBtn');
+  const canvas = document.getElementById('wave');
+  const ctx = canvas.getContext('2d');
+
+  function loadWord(){
+    const w = words[wIdx];
+    wordEl.textContent = w.text;
+    phoneticEl.textContent = w.phonetic;
+    korEl.textContent = w.kor;
+    scoreWrap.style.display = 'none';
+    drawIdleWave();
+  }
+  document.getElementById('prevBtn').addEventListener('click', () => { wIdx = (wIdx-1+words.length)%words.length; loadWord(); });
+  document.getElementById('nextBtn').addEventListener('click', () => { wIdx = (wIdx+1)%words.length; loadWord(); });
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(words[wIdx].text);
+    u.lang = 'en-US'; u.rate = 0.85;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+
+  function drawIdleWave(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = '#C9D9F5';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height/2);
+    ctx.lineTo(canvas.width, canvas.height/2);
+    ctx.stroke();
+  }
+
+  function similarity(a, b){
+    a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+    if(a === b) return 1;
+    const longer = a.length > b.length ? a : b;
+    const shorter = a.length > b.length ? b : a;
+    if(longer.length === 0) return 1;
+    const editDistance = levenshtein(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+  function levenshtein(a, b){
+    const dp = Array.from({length:a.length+1}, (_,i)=>[i,...Array(b.length).fill(0)]);
+    for(let j=0;j<=b.length;j++) dp[0][j]=j;
+    for(let i=1;i<=a.length;i++){
+      for(let j=1;j<=b.length;j++){
+        dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);
+      }
+    }
+    return dp[a.length][b.length];
+  }
+
+  // 음성 인식 (Web Speech API)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let recording = false;
+
+  if(SpeechRecognition){
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (e) => {
+      const heard = e.results[0][0].transcript;
+      const target = words[wIdx].text;
+      const sim = similarity(heard, target);
+      const pct = Math.round(sim*100);
+      scoreWrap.style.display = 'block';
+      scoreNum.textContent = pct + '%';
+      scoreNum.className = 'score-num ' + (pct >= 75 ? 'good' : pct >= 45 ? 'mid' : 'bad');
+      heardEl.textContent = `내가 말한 소리: "${heard}"`;
+    };
+    recognition.onend = () => { recording = false; micBtn.classList.remove('recording'); micBtn.textContent = '🎙️ 따라 말하기'; drawIdleWave(); };
+    recognition.onerror = () => { recording = false; micBtn.classList.remove('recording'); micBtn.textContent = '🎙️ 따라 말하기'; };
+  } else {
+    document.getElementById('unsupported').style.display = 'block';
+    micBtn.disabled = true;
+  }
+
+  // 마이크 입력 파형 시각화 (선택적, getUserMedia 지원 시)
+  let audioCtx, analyser, dataArray, source, rafId;
+  async function startWave(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      drawLiveWave(stream);
+    } catch(err){ /* 마이크 권한 거부 시 파형 없이 인식만 진행 */ }
+  }
+  function drawLiveWave(stream){
+    function loop(){
+      if(!recording){
+        stream.getTracks().forEach(t => t.stop());
+        if(audioCtx) audioCtx.close();
+        return;
+      }
+      analyser.getByteTimeDomainData(dataArray);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.strokeStyle = '#6BB6FF';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const slice = canvas.width / dataArray.length;
+      let x = 0;
+      for(let i=0;i<dataArray.length;i++){
+        const v = dataArray[i]/128.0;
+        const y = v * canvas.height/2;
+        i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        x += slice;
+      }
+      ctx.stroke();
+      rafId = requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  micBtn.addEventListener('click', () => {
+    if(!recognition) return;
+    if(recording){
+      recognition.stop();
+      recording = false;
+      return;
+    }
+    recording = true;
+    micBtn.classList.add('recording');
+    micBtn.textContent = '⏹️ 녹음 중지';
+    scoreWrap.style.display = 'none';
+    recognition.start();
+    startWave();
+  });
+
+  loadWord();
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감정 카드 읽기 — 특수교육</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg:#F5FBF8; --card:#ffffff; --ink:#1B2E27; --muted:#5C7A70;
+    --accent:#2FA97C; --accent-soft:#E4F7EE;
+    --font-display:'Jua',sans-serif; --font-body:'PretendardVariable',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:26px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); }
+  .wrap{ max-width:560px; margin:0 auto; padding:20px 18px 60px; }
+  @media(min-width:900px){ .wrap{ max-width:680px; padding-top:36px; } }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px; }
+  .back{
+    font-family:var(--font-mono); font-size:14px; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:999px; background:#fff;
+    border: 2px solid #E1F0E9;
+  }
+  .badge{ font-family:var(--font-mono); font-size:12px; background:var(--accent); color:#fff; padding:8px 14px; border-radius:999px; font-weight:700; }
+
+  h1{ font-family:var(--font-display); font-size: clamp(28px,6.5vw,36px); margin: 6px 0 8px; }
+  .sub{ color:var(--muted); font-size:16px; margin-bottom: 30px; line-height:1.6; }
+
+  .stage{
+    background:var(--card); border-radius:var(--radius); padding: 32px 24px; text-align:center;
+    border: 2px solid #E1F0E9;
+  }
+  .face{ font-size: 96px; line-height:1; margin-bottom: 18px; }
+  .prompt{ font-family:var(--font-display); font-size:22px; margin-bottom: 30px; color:var(--ink); }
+
+  .choices{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .choice{
+    font-family:var(--font-display); font-size:20px;
+    padding: 22px 12px; border-radius: 20px; border: 3px solid #E1F0E9; background:#fff; color:var(--ink);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .choice .emoji{ font-size:34px; }
+  .choice:hover, .choice:focus-visible{ border-color: var(--accent); background: var(--accent-soft); }
+  .choice.correct{ border-color: var(--accent); background: var(--accent-soft); }
+  .choice.wrong{ border-color:#E0663F; background:#FCEBE5; }
+
+  .feedback{ margin-top:24px; font-size:18px; font-weight:700; min-height:28px; }
+  .feedback.good{ color: var(--accent); }
+  .feedback.bad{ color:#D65B3C; }
+
+  .controls{ margin-top: 26px; display:flex; justify-content:center; gap:12px; }
+  .icon-btn{
+    display:flex; align-items:center; gap:8px; font-family:var(--font-body); font-size:15px;
+    padding: 12px 20px; border-radius:999px; border:2px solid #E1F0E9; background:#fff; color:var(--ink); cursor:pointer;
+  }
+  .icon-btn:hover{ border-color:var(--accent); }
+
+  .progress{ display:flex; justify-content:center; gap:8px; margin-top:26px; }
+  .progress .dot{ width:12px; height:12px; border-radius:50%; background:#E1F0E9; }
+  .progress .dot.done{ background: var(--accent); }
+
+  .explain{ margin-top:28px; background:var(--card); border:2px solid #E1F0E9; border-radius:var(--radius); padding:20px 22px; }
+  .explain h3{ margin:0 0 8px; font-size:14px; font-family:var(--font-mono); color:var(--accent); }
+  .explain p{ margin:0; font-size:14px; color:var(--muted); line-height:1.7; }
+
+  /* 특수교육 대상: 애니메이션 최소화, 있더라도 매우 짧고 예측 가능하게 */
+  .choice, .icon-btn{ transition: border-color .15s ease, background .15s ease; }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="../portfolio.html">← 메인으로</a>
+      <span class="badge">특수교육 · 사회성</span>
+    </div>
+
+    <h1>감정 카드 읽기 🙂</h1>
+    <p class="sub">얼굴 표정을 보고, 어떤 감정인지 알맞은 단어를 골라보세요. 정답을 고르면 소리로도 읽어줘요.</p>
+
+    <div class="stage">
+      <div class="face" id="face">🙂</div>
+      <div class="prompt">이 표정은 어떤 마음일까요?</div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="controls">
+      <button class="icon-btn" id="speakBtn">🔊 다시 듣기</button>
+    </div>
+
+    <div class="explain">
+      <h3>✦ AI 활용 방식</h3>
+      <p>실제 서비스에서는 이미지 인식 AI가 사진 속 표정을 분석해 감정을 자동으로 판별합니다. 이 데모는 이미 정해진 표정 이모지 세트를 사용하고, 정답 선택 시 음성 합성(Text-to-Speech)으로 결과를 읽어주어 텍스트 읽기가 어려운 학생도 청각으로 이해할 수 있도록 돕습니다.</p>
+    </div>
+  </div>
+
+<script>
+  const rounds = [
+    { face:'😀', answer:'기뻐요', options:['기뻐요','슬퍼요','화나요','놀라요'] },
+    { face:'😢', answer:'슬퍼요', options:['슬퍼요','기뻐요','무서워요','화나요'] },
+    { face:'😠', answer:'화나요', options:['화나요','기뻐요','슬퍼요','졸려요'] },
+    { face:'😲', answer:'놀라요', options:['놀라요','화나요','슬퍼요','기뻐요'] },
+    { face:'😨', answer:'무서워요', options:['무서워요','기뻐요','졸려요','화나요'] }
+  ];
+  let idx = 0;
+  let correctCount = 0;
+
+  const faceEl = document.getElementById('face');
+  const choicesEl = document.getElementById('choices');
+  const feedbackEl = document.getElementById('feedback');
+  const progressEl = document.getElementById('progress');
+
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
+
+  function renderProgress(){
+    progressEl.innerHTML = rounds.map((_, i) => `<span class="dot ${i < idx ? 'done' : ''}"></span>`).join('');
+  }
+
+  function loadRound(){
+    if(idx >= rounds.length){
+      faceEl.textContent = '🎉';
+      choicesEl.innerHTML = '';
+      feedbackEl.textContent = `잘했어요! ${correctCount} / ${rounds.length}개를 맞혔어요`;
+      feedbackEl.className = 'feedback good';
+      speak(`잘했어요! ${rounds.length}개 중에 ${correctCount}개를 맞혔어요`);
+      renderProgress();
+      return;
+    }
+    const r = rounds[idx];
+    faceEl.textContent = r.face;
+    feedbackEl.textContent = '';
+    feedbackEl.className = 'feedback';
+    choicesEl.innerHTML = '';
+    r.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.innerHTML = `<span>${opt}</span>`;
+      btn.addEventListener('click', () => handleChoice(btn, opt, r.answer));
+      choicesEl.appendChild(btn);
+    });
+    renderProgress();
+    speak('이 표정은 어떤 마음일까요?');
+  }
+
+  function handleChoice(btn, chosen, answer){
+    const allBtns = choicesEl.querySelectorAll('.choice');
+    allBtns.forEach(b => b.disabled = true);
+    if(chosen === answer){
+      btn.classList.add('correct');
+      feedbackEl.textContent = `맞았어요! "${answer}"예요`;
+      feedbackEl.className = 'feedback good';
+      correctCount++;
+      speak(`정답이에요. ${answer}`);
+    } else {
+      btn.classList.add('wrong');
+      feedbackEl.textContent = `괜찮아요. 정답은 "${answer}"예요`;
+      feedbackEl.className = 'feedback bad';
+      speak(`정답은 ${answer} 예요`);
+    }
+    setTimeout(() => { idx++; loadRound(); }, 1600);
+  }
+
+  document.getElementById('speakBtn').addEventListener('click', () => {
+    speak('이 표정은 어떤 마음일까요?');
+  });
+
+  loadRound();
+</script>
+</body>
+</html>
