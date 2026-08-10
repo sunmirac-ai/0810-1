@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI × 교육 — AI 융합 교육 콘텐츠 개발자 포트폴리오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg: #14231C;
+    --bg-soft: #182A21;
+    --surface: #1D3229;
+    --surface-2: #22392F;
+    --ink: #F3F1E7;
+    --ink-muted: #9AB0A2;
+    --ink-faint: #6C8A7A;
+    --chalk: #FFD166;
+    --chalk-dim: #E8B94F;
+    --c-elem: #FF8B6B;
+    --c-mid: #6BB6FF;
+    --c-high: #A78BFA;
+    --c-special: #6BFFB8;
+    --line: rgba(243,241,231,0.14);
+    --radius: 18px;
+    --font-display: 'Gaegu', sans-serif;
+    --font-body: 'PretendardVariable', 'Pretendard', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --ease: cubic-bezier(.22,.9,.32,1);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,209,102,0.05), transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(107,182,255,0.06), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+  img{ max-width:100%; display:block; }
+  a{ color:inherit; }
+  section{ position:relative; z-index:1; padding: 88px 22px; max-width: 720px; margin:0 auto; }
+  h1,h2,h3{ font-family: var(--font-display); font-weight:700; margin:0; }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--chalk);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom: 16px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background: var(--chalk); display:inline-block; }
+
+  :focus-visible{ outline: 2px solid var(--chalk); outline-offset: 3px; border-radius: 4px; }
+
+  /* ---------- NAV ---------- */
+  header{
+    position: sticky; top:0; z-index:50;
+    backdrop-filter: blur(10px);
+    background: rgba(20,35,28,0.82);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    max-width: 720px; margin:0 auto; padding: 14px 22px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{
+    font-family: var(--font-display);
+    font-size: 20px; font-weight:700;
+    display:flex; align-items:center; gap:6px;
+  }
+  .logo span{ color: var(--chalk); }
+  nav.links{ display:flex; gap: 18px; font-size: 13px; font-family: var(--font-mono); }
+  nav.links a{ text-decoration:none; color: var(--ink-muted); transition: color .2s; }
+  nav.links a:hover{ color: var(--chalk); }
+
+  /* ---------- HERO ---------- */
+  .hero{ padding-top: 64px; padding-bottom: 56px; text-align:left; }
+  .hero h1{
+    font-size: clamp(34px, 9vw, 52px);
+    line-height: 1.28;
+    position: relative;
+    display:inline;
+  }
+  .underline-wrap{ position:relative; display:inline-block; }
+  .underline-wrap svg{
+    position:absolute; left:-4px; right:-4px; bottom:-10px; width: calc(100% + 8px);
+    height: 18px; overflow: visible;
+  }
+  .underline-wrap path{
+    fill:none; stroke: var(--chalk); stroke-width:6; stroke-linecap:round;
+    stroke-dasharray: 340; stroke-dashoffset: 340;
+    animation: draw 1.1s var(--ease) .3s forwards;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+
+  .hero p.lead{
+    margin-top: 26px;
+    color: var(--ink-muted);
+    font-size: 16px;
+    max-width: 46ch;
+  }
+  .hero-cta{ display:flex; gap:12px; margin-top: 32px; flex-wrap:wrap; }
+  .btn{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 13px 22px;
+    border-radius: 999px;
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition: transform .18s var(--ease), background .18s;
+    border: 1px solid transparent;
+    cursor:pointer;
+  }
+  .btn-primary{ background: var(--chalk); color: #16261D; font-weight:700; }
+  .btn-primary:hover{ transform: translateY(-2px); background: var(--chalk-dim); }
+  .btn-ghost{ border-color: var(--line); color: var(--ink); background:transparent; }
+  .btn-ghost:hover{ transform: translateY(-2px); border-color: var(--chalk); }
+
+  .hero-tags{ margin-top:44px; display:flex; gap:10px; flex-wrap:wrap; }
+  .grade-chip{
+    font-family: var(--font-mono); font-size:11px; padding:6px 12px;
+    border-radius: 999px; border:1px solid var(--line); color: var(--ink-muted);
+  }
+  .dot{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; }
+
+  /* ---------- divider (chalk stroke) ---------- */
+  .chalk-divider{ max-width:720px; margin: 0 auto; padding: 0 22px; }
+  .chalk-divider svg{ width:100%; height:14px; display:block; opacity:.5; }
+  .chalk-divider path{ stroke: var(--ink-faint); stroke-width:1.4; fill:none; stroke-linecap:round; }
+
+  /* ---------- ABOUT / PHILOSOPHY ---------- */
+  .section-title{ font-size: clamp(24px, 6vw, 30px); margin-bottom: 14px; }
+  .section-sub{ color: var(--ink-muted); font-size:15px; margin-bottom: 40px; max-width: 52ch; }
+
+  .about-grid{ display:grid; grid-template-columns: 1fr; gap: 18px; }
+  @media(min-width: 640px){ .about-grid{ grid-template-columns: 1fr 1fr; } }
+  .about-card{
+    background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; opacity:0; transform: translateY(16px);
+  }
+  .about-card.in{ animation: rise .6s var(--ease) forwards; }
+  @keyframes rise{ to{ opacity:1; transform:none; } }
+  .about-card h3{ font-size:18px; margin-bottom:8px; color: var(--chalk); }
+  .about-card p{ color: var(--ink-muted); font-size: 14px; margin:0; }
+
+  .principle-list{ display:flex; flex-direction:column; gap:14px; }
+  .principle{
+    display:flex; gap:16px; align-items:flex-start;
+    background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 20px; opacity:0; transform: translateY(16px);
+  }
+  .principle.in{ animation: rise .6s var(--ease) forwards; }
+  .principle .num{ font-family: var(--font-mono); color: var(--chalk); font-size:13px; padding-top:2px; }
+  .principle h3{ font-size:16px; margin-bottom:6px; }
+  .principle p{ margin:0; color: var(--ink-muted); font-size: 13.5px; }
+
+  /* ---------- PROJECTS ---------- */
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 26px; }
+  .filter-chip{
+    font-family: var(--font-mono); font-size:12.5px; padding:9px 16px;
+    border-radius:999px; border:1px solid var(--line); background:transparent;
+    color: var(--ink-muted); cursor:pointer; transition: all .2s var(--ease);
+  }
+  .filter-chip.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight:700; }
+  .filter-chip:hover:not(.active){ border-color: var(--chalk); color: var(--chalk); }
+
+  .project-grid{ display:grid; grid-template-columns:1fr; gap:16px; }
+  .card{
+    position:relative;
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 20px 20px 26px;
+    overflow:hidden;
+    transition: transform .22s var(--ease), border-color .22s;
+    cursor:pointer;
+  }
+  .card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:6px;
+    background: var(--tab-color, var(--chalk));
+  }
+  .card:hover{ transform: translateY(-3px); border-color: var(--line); }
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px; }
+  .card-badge{
+    font-family: var(--font-mono); font-size:10.5px; padding:4px 10px; border-radius:999px;
+    background: var(--surface-2); color: var(--ink-muted); white-space:nowrap;
+  }
+  .card h3{ font-size: 19px; margin-bottom:6px; font-family: var(--font-body); font-weight:700; }
+  .card .unit{ font-size: 13px; color: var(--ink-muted); margin-bottom: 14px; }
+  .ai-point{
+    font-size:12.5px; color: var(--tab-color, var(--chalk));
+    font-family: var(--font-mono);
+    display:flex; gap:6px; align-items:flex-start; margin-bottom:16px;
+  }
+  .card-cta{
+    font-family: var(--font-mono); font-size:12.5px; color: var(--ink);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .card-cta svg{ transition: transform .2s; }
+  .card:hover .card-cta svg{ transform: translateX(4px); }
+
+  /* ---------- TECH STACK ---------- */
+  .stack-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .stack-item{
+    font-family: var(--font-mono); font-size:12.5px;
+    border:1px solid var(--line); border-radius:10px; padding:10px 14px;
+    color: var(--ink-muted); background: var(--surface);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{ padding: 60px 22px 90px; text-align:center; }
+  footer .foot-name{ font-family: var(--font-display); font-size:22px; margin-bottom:10px; }
+  footer p{ color: var(--ink-faint); font-size:13px; }
+  .foot-links{ display:flex; gap:16px; justify-content:center; margin-top:18px; font-family: var(--font-mono); font-size:12.5px; }
+  .foot-links a{ text-decoration:none; color: var(--ink-muted); }
+  .foot-links a:hover{ color: var(--chalk); }
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position: fixed; inset:0; background: rgba(10,16,13,0.72);
+    display:none; align-items:flex-end; justify-content:center; z-index:100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open{ display:flex; }
+  @media(min-width:640px){ .modal-overlay{ align-items:center; } }
+  .modal{
+    background: var(--bg-soft); border:1px solid var(--line);
+    border-radius: 20px 20px 0 0; width:100%; max-width:520px;
+    max-height: 86vh; overflow-y:auto; padding: 26px 22px 32px;
+    transform: translateY(100%); transition: transform .32s var(--ease);
+  }
+  @media(min-width:640px){ .modal{ border-radius:20px; transform: translateY(20px) scale(.97); opacity:0; transition: all .28s var(--ease); } }
+  .modal-overlay.open .modal{ transform: translateY(0) scale(1); opacity:1; }
+  .modal-close{
+    float:right; background:none; border:none; color: var(--ink-muted); font-size:22px; cursor:pointer; line-height:1;
+  }
+  .modal h3{ font-size:22px; margin-bottom:6px; font-family: var(--font-body); }
+  .modal .modal-meta{ font-family: var(--font-mono); font-size:12px; color: var(--ink-faint); margin-bottom:18px; }
+  .modal p{ color: var(--ink-muted); font-size:14px; }
+
+  /* demo game inside modal */
+  .demo-box{
+    margin-top: 18px; background: var(--surface); border-radius:14px; padding:20px; text-align:center;
+    border:1px solid var(--line);
+  }
+  .demo-question{ font-family: var(--font-display); font-size: 30px; margin-bottom: 16px; }
+  .demo-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .demo-opt{
+    font-family: var(--font-mono); font-size:16px; padding:14px; border-radius:12px;
+    border:1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor:pointer;
+  }
+  .demo-opt:hover{ border-color: var(--chalk); }
+  .demo-feedback{ margin-top:14px; font-size:13.5px; min-height: 20px; font-family: var(--font-mono); }
+  .demo-feedback.good{ color: var(--c-special); }
+  .demo-feedback.bad{ color: var(--c-elem); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <div class="logo">AI<span>×</span>교육</div>
+    <nav class="links">
+      <a href="#projects">프로젝트</a>
+      <a href="#stack">기술스택</a>
+      <a href="#contact">연락처</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">Portfolio — AI 융합 교육 콘텐츠 개발자</p>
+  <h1>
+    칠판 위에<br>
+    <span class="underline-wrap">코드를 얹다<svg viewBox="0 0 300 18"><path d="M4,10 C 90,16 210,4 296,9"/></svg></span>
+  </h1>
+  <p class="lead">
+    초·중·고 및 특수 교육 대상자를 위한 AI 융합 학습 콘텐츠를 기획하고 개발합니다.
+    교육과정에 뿌리내린 활동에 AI 기술을 자연스럽게 얹어, 배움이 놀이가 되는 경험을 만듭니다.
+  </p>
+  <div class="hero-cta">
+    <a href="#projects" class="btn btn-primary">프로젝트 둘러보기</a>
+    <a href="#contact" class="btn btn-ghost">연락하기</a>
+  </div>
+  <div class="hero-tags">
+    <span class="grade-chip"><i class="dot" style="background:var(--c-elem)"></i>초등</span>
+    <span class="grade-chip"><i class="dot" style="background:var(--c-mid)"></i>중등</span>
+    <span class="grade-chip"><i class="dot" style="background:var(--c-high)"></i>고등</span>
+    <span class="grade-chip"><i class="dot" style="background:var(--c-special)"></i>특수교육</span>
+  </div>
+</section>
+
+<div class="chalk-divider"><svg viewBox="0 0 700 14" preserveAspectRatio="none"><path d="M0,7 C120,2 240,12 360,7 C480,2 600,12 700,7"/></svg></div>
+
+<section id="about">
+  <p class="eyebrow">About</p>
+  <h2 class="section-title">두 개의 역할, 하나의 목표</h2>
+  <p class="section-sub">교육 콘텐츠 기획자의 시선과 프론트엔드 개발자의 손끝으로, 아이디어를 바로 만져볼 수 있는 결과물로 만듭니다.</p>
+  <div class="about-grid">
+    <div class="about-card">
+      <h3>🧩 AI 융합 교육 콘텐츠 개발자</h3>
+      <p>한국 교육과정의 과목·단원과 연결된 학습 활동을 설계합니다. 단순 게임이 아닌, AI 개념(패턴 인식, 데이터 기반 피드백 등)이 학습 로직 안에 녹아 있는 콘텐츠를 만듭니다.</p>
+    </div>
+    <div class="about-card">
+      <h3>💻 프론트엔드 개발자</h3>
+      <p>Vanilla JS·HTML·CSS를 우선으로, 가볍고 빠르게 실행되는 모바일 퍼스트 웹을 구현합니다. 연령대와 인지 수준에 맞춰 UI 복잡도를 조절합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="philosophy">
+  <p class="eyebrow">Philosophy</p>
+  <h2 class="section-title">콘텐츠를 만드는 세 가지 원칙</h2>
+  <p class="section-sub">모든 프로젝트는 이 세 가지 질문을 통과해야 시작됩니다.</p>
+  <div class="principle-list">
+    <div class="principle">
+      <span class="num">01</span>
+      <div><h3>교과와 연결되어 있는가</h3><p>모든 활동은 특정 학년·과목·단원의 성취 기준과 명확히 연결됩니다. 재미가 배움을 대체하지 않습니다.</p></div>
+    </div>
+    <div class="principle">
+      <span class="num">02</span>
+      <div><h3>AI가 장식이 아닌 논리인가</h3><p>AI는 부가 기능이 아니라 학습 로직의 일부입니다. 오답 패턴을 분석해 난이도를 조정하는 식으로, 데이터가 학습 경험을 바꿉니다.</p></div>
+    </div>
+    <div class="principle">
+      <span class="num">03</span>
+      <div><h3>모두가 접근할 수 있는가</h3><p>특수 아동을 포함한 모든 학습자가 텍스트가 아닌 시각·청각 신호로도 이해할 수 있도록 설계합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="chalk-divider"><svg viewBox="0 0 700 14" preserveAspectRatio="none"><path d="M0,7 C120,2 240,12 360,7 C480,2 600,12 700,7"/></svg></div>
+
+<section id="projects">
+  <p class="eyebrow">Projects</p>
+  <h2 class="section-title">프로젝트 갤러리</h2>
+  <p class="section-sub">카드를 눌러 교과 연계 포인트와 AI 활용 방식을 확인하세요. 첫 번째 카드는 실제 데모를 체험할 수 있습니다.</p>
+
+  <div class="filter-row" id="filterRow">
+    <button class="filter-chip active" data-filter="all">전체</button>
+    <button class="filter-chip" data-filter="elem">🐣 초등</button>
+    <button class="filter-chip" data-filter="mid">📘 중등</button>
+    <button class="filter-chip" data-filter="high">🎓 고등</button>
+    <button class="filter-chip" data-filter="special">🌈 특수교육</button>
+  </div>
+
+  <div class="project-grid" id="projectGrid"></div>
+</section>
+
+<div class="chalk-divider"><svg viewBox="0 0 700 14" preserveAspectRatio="none"><path d="M0,7 C120,2 240,12 360,7 C480,2 600,12 700,7"/></svg></div>
+
+<section id="stack">
+  <p class="eyebrow">Tech Stack</p>
+  <h2 class="section-title">사용 기술</h2>
+  <div class="stack-grid">
+    <span class="stack-item">HTML5</span>
+    <span class="stack-item">CSS3</span>
+    <span class="stack-item">Vanilla JavaScript</span>
+    <span class="stack-item">Claude API</span>
+    <span class="stack-item">Web Speech API</span>
+    <span class="stack-item">Canvas API</span>
+    <span class="stack-item">반응형 / 모바일 퍼스트</span>
+    <span class="stack-item">웹 접근성(WCAG)</span>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="foot-name">함께 만들어갈 배움을 고민합니다</div>
+  <p>교육 관계자, 채용 담당자 분들의 연락을 기다립니다.</p>
+  <div class="foot-links">
+    <a href="mailto:hello@example.com">이메일</a>
+    <a href="#">GitHub</a>
+    <a href="#">이력서</a>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" aria-label="닫기">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  // ---------- 프로젝트 데이터 (확장 시 이 배열에만 항목 추가) ----------
+  const projects = [
+    {
+      id: 'math-add',
+      category: 'elem',
+      categoryLabel: '초등 · 수학',
+      color: 'var(--c-elem)',
+      title: '분필 덧셈 놀이터',
+      unit: '초등 1~2학년 · 수학 · 덧셈과 뺄셈',
+      aiPoint: 'AI 활용: 학생의 오답 패턴을 누적 분석해 다음 문제의 난이도(자릿수)를 자동 조정',
+      hasDemo: true
+    },
+    {
+      id: 'science-eco',
+      category: 'mid',
+      categoryLabel: '중등 · 과학',
+      color: 'var(--c-mid)',
+      title: '탄소발자국 추적기',
+      unit: '중등 1학년 · 과학 · 환경과 생태계',
+      aiPoint: 'AI 활용: 일상 활동 입력값을 분석해 탄소 배출 패턴을 시각화하고 감축 제안 생성',
+      hasDemo: false
+    },
+    {
+      id: 'korean-classify',
+      category: 'high',
+      categoryLabel: '고등 · 국어',
+      color: 'var(--c-high)',
+      title: '문장 성분 분류기',
+      unit: '고등 1학년 · 국어 · 문법과 문장 구조',
+      aiPoint: 'AI 활용: 텍스트 분석 API로 학생이 입력한 문장의 성분을 실시간 판별·피드백',
+      hasDemo: false
+    },
+    {
+      id: 'special-emotion',
+      category: 'special',
+      categoryLabel: '특수교육 · 사회성',
+      color: 'var(--c-special)',
+      title: '감정 카드 읽기',
+      unit: '특수교육 · 사회성 발달 · 감정 인식',
+      aiPoint: 'AI 활용: 이미지 인식으로 표정을 분석해 감정 단어와 매칭, 음성 피드백 제공',
+      hasDemo: false
+    },
+    {
+      id: 'elem-eng',
+      category: 'elem',
+      categoryLabel: '초등 · 영어',
+      color: 'var(--c-elem)',
+      title: '발음 반사거울',
+      unit: '초등 5~6학년 · 영어 · 말하기',
+      aiPoint: 'AI 활용: 음성 인식으로 발음 정확도를 점수화하고 원어민 발음과 파형 비교',
+      hasDemo: false
+    },
+    {
+      id: 'mid-history',
+      category: 'mid',
+      categoryLabel: '중등 · 역사',
+      color: 'var(--c-mid)',
+      title: '타임라인 탐정',
+      unit: '중등 2학년 · 역사 · 근현대사 사건 순서',
+      aiPoint: 'AI 활용: 사건 카드 배열 오류를 감지해 관련 배경지식 힌트를 단계적으로 제공',
+      hasDemo: false
+    }
+  ];
+
+  const grid = document.getElementById('projectGrid');
+  const chevron = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+  function renderProjects(filter){
+    grid.innerHTML = '';
+    const list = filter === 'all' ? projects : projects.filter(p => p.category === filter);
+    list.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.setProperty('--tab-color', p.color);
+      card.style.animationDelay = (i * 0.05) + 's';
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="card-badge">${p.categoryLabel}</span>
+          ${p.hasDemo ? '<span class="card-badge" style="color:var(--chalk)">데모 체험 가능</span>' : ''}
+        </div>
+        <h3>${p.title}</h3>
+        <div class="unit">${p.unit}</div>
+        <div class="ai-point">✦ ${p.aiPoint}</div>
+        <span class="card-cta">체험하기 ${chevron}</span>
+      `;
+      card.addEventListener('click', () => openModal(p));
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('filterRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-chip');
+    if(!btn) return;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderProjects(btn.dataset.filter);
+  });
+
+  renderProjects('all');
+
+  // ---------- 모달 ----------
+  const overlay = document.getElementById('modalOverlay');
+  const modalBody = document.getElementById('modalBody');
+
+  function openModal(p){
+    if(p.hasDemo){
+      modalBody.innerHTML = `
+        <h3>${p.title}</h3>
+        <div class="modal-meta">${p.unit}</div>
+        <p>${p.aiPoint}</p>
+        <div class="demo-box" id="demoBox"></div>
+      `;
+      startAdditionDemo();
+    } else {
+      modalBody.innerHTML = `
+        <h3>${p.title}</h3>
+        <div class="modal-meta">${p.unit}</div>
+        <p>${p.aiPoint}</p>
+        <p style="margin-top:16px; color:var(--ink-faint); font-size:13px;">
+          이 프로젝트는 별도 페이지로 준비 중입니다. 완성 시 이 카드에서 바로 실행 파일로 연결됩니다.
+        </p>
+      `;
+    }
+    overlay.classList.add('open');
+  }
+  document.getElementById('modalClose').addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('open'); });
+
+  // ---------- 미니 데모: AI 난이도 조정 덧셈 게임 ----------
+  function startAdditionDemo(){
+    let level = 1; // 1: 한자리, 2: 두자리
+    let wrongStreak = 0, correctStreak = 0;
+    const box = document.getElementById('demoBox');
+
+    function newQuestion(){
+      const max = level === 1 ? 9 : 50;
+      const a = Math.floor(Math.random()*max)+1;
+      const b = Math.floor(Math.random()*max)+1;
+      const answer = a + b;
+      const options = new Set([answer]);
+      while(options.size < 4){
+        const delta = Math.floor(Math.random()*9)-4;
+        const fake = answer + delta;
+        if(fake > 0 && fake !== answer) options.add(fake);
+      }
+      const shuffled = [...options].sort(() => Math.random()-0.5);
+
+      box.innerHTML = `
+        <div class="demo-question">${a} + ${b} = ?</div>
+        <div class="demo-options">
+          ${shuffled.map(o => `<button class="demo-opt" data-val="${o}">${o}</button>`).join('')}
+        </div>
+        <div class="demo-feedback" id="fb"></div>
+        <div style="margin-top:10px; font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);">
+          현재 난이도: ${level === 1 ? '한 자리 수' : '두 자리 수'} (AI가 자동 조정 중)
+        </div>
+      `;
+      box.querySelectorAll('.demo-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.val);
+          const fb = document.getElementById('fb');
+          if(val === answer){
+            fb.textContent = '정답이에요! 잘했어요 ✦';
+            fb.className = 'demo-feedback good';
+            correctStreak++; wrongStreak = 0;
+            if(correctStreak >= 3 && level === 1){ level = 2; correctStreak = 0; }
+          } else {
+            fb.textContent = `아쉬워요, 정답은 ${answer}이었어요`;
+            fb.className = 'demo-feedback bad';
+            wrongStreak++; correctStreak = 0;
+            if(wrongStreak >= 2 && level === 2){ level = 1; wrongStreak = 0; }
+          }
+          setTimeout(newQuestion, 850);
+        });
+      });
+    }
+    newQuestion();
+  }
+
+  // ---------- scroll reveal ----------
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.about-card, .principle').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
