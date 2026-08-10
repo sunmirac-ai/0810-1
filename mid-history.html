@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>타임라인 탐정 — 중등 역사</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg:#171522; --card:#211E30; --ink:#EDEBF5; --muted:#8D87A6;
+    --accent:#FFB454; --accent2:#6BB6FF; --good:#5FD98A; --bad:#FF7A6B;
+    --font-display:'Gowun Batang',serif; --font-body:'PretendardVariable',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); }
+  .wrap{ max-width:560px; margin:0 auto; padding:20px 18px 60px; }
+  @media(min-width:900px){ .wrap{ max-width:760px; padding-top:40px; } }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px; }
+  .back{
+    font-family:var(--font-mono); font-size:12.5px; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid #322E45;
+  }
+  .badge{ font-family:var(--font-mono); font-size:11px; background:var(--accent); color:#402A00; padding:6px 12px; border-radius:6px; font-weight:700; }
+
+  h1{ font-family:var(--font-display); font-size: clamp(26px,6vw,34px); margin: 4px 0 8px; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom: 26px; max-width:56ch; }
+
+  .timeline-track{
+    background:var(--card); border-radius:var(--radius); padding: 18px; border: 1px dashed #3A3552;
+    min-height: 84px; display:flex; flex-wrap:wrap; gap:10px; align-content:flex-start;
+  }
+  .placeholder{ color: var(--muted); font-size:13px; font-family:var(--font-mono); padding: 10px; }
+  .slot{
+    display:flex; align-items:center; gap:8px; background:#2B2740; border-radius:10px; padding: 10px 14px;
+    font-size:13.5px; cursor:pointer; border:1px solid #3A3552;
+  }
+  .slot .order-num{ font-family:var(--font-mono); color:var(--accent); font-weight:700; }
+  .slot.correct{ border-color: var(--good); }
+  .slot.wrong{ border-color: var(--bad); }
+  .slot .remove{ color: var(--muted); font-size:12px; margin-left:4px; }
+
+  h2.section-h{ font-family:var(--font-mono); font-size:12.5px; color:var(--muted); margin: 26px 0 12px; letter-spacing:.06em; }
+
+  .card-pool{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(min-width:640px){ .card-pool{ grid-template-columns: 1fr 1fr; } }
+  .event-card{
+    background:var(--card); border:1px solid #322E45; border-radius: var(--radius); padding:16px;
+    cursor:pointer; transition: border-color .15s ease, transform .15s ease;
+  }
+  .event-card:hover{ border-color: var(--accent2); transform: translateY(-2px); }
+  .event-card.used{ opacity:0.28; pointer-events:none; }
+  .event-card .title{ font-weight:700; font-size:14.5px; margin-bottom:6px; }
+  .event-card .desc{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+
+  .btn-row{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  .btn{ font-family:var(--font-mono); font-size:13px; padding:12px 20px; border-radius:8px; border:none; cursor:pointer; }
+  .btn-primary{ background: var(--accent); color:#402A00; font-weight:700; }
+  .btn-ghost{ background:transparent; border:1px solid #322E45; color:var(--muted); }
+  .btn-ghost:hover{ border-color:var(--accent2); color:var(--accent2); }
+
+  .feedback-box{
+    margin-top:20px; padding:16px 18px; border-radius: var(--radius); font-size:13.5px; line-height:1.6; display:none;
+  }
+  .feedback-box.show{ display:block; }
+  .feedback-box.good{ background: rgba(95,217,138,0.12); border:1px solid var(--good); color:#B7F0C7; }
+  .feedback-box.bad{ background: rgba(255,122,107,0.12); border:1px solid var(--bad); color:#FFC9C2; }
+
+  .explain{ margin-top:26px; background:var(--card); border:1px solid #322E45; border-radius:var(--radius); padding:18px 20px; }
+  .explain h3{ margin:0 0 8px; font-size:13px; font-family:var(--font-mono); color:var(--accent2); }
+  .explain p{ margin:0; font-size:13px; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="../portfolio.html">← 메인으로</a>
+      <span class="badge">중등 2학년 · 역사</span>
+    </div>
+
+    <h1>타임라인 탐정 🕵️</h1>
+    <p class="sub">아래 사건 카드를 시간 순서대로 눌러 타임라인에 배치해보세요. 확인 버튼을 누르면 순서를 채점해줘요.</p>
+
+    <div class="timeline-track" id="track">
+      <span class="placeholder" id="placeholder">여기에 순서대로 사건이 쌓여요 →</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="checkBtn">순서 확인하기</button>
+      <button class="btn btn-ghost" id="resetBtn">다시 하기</button>
+    </div>
+
+    <div class="feedback-box" id="feedbackBox"></div>
+
+    <h2 class="section-h">사건 카드 (순서대로 클릭)</h2>
+    <div class="card-pool" id="pool"></div>
+
+    <div class="explain">
+      <h3>✦ AI 활용 방식</h3>
+      <p>학생이 배치한 순서와 정답 순서를 비교해 몇 번째 위치부터 어긋났는지 자동으로 감지합니다. 오류가 발견된 지점의 사건과 관련된 배경지식 힌트를 우선적으로 제공해, 막연히 정답만 알려주는 대신 스스로 다시 생각해볼 단서를 줍니다.</p>
+    </div>
+  </div>
+
+<script>
+  // correctOrder 인덱스가 실제 시간 순서 (educational example, 임의 근현대사 사건)
+  const events = [
+    { id:1, title:'3·1 운동', desc:'1919년, 전국적인 만세 운동이 일어났다.', hint:'대한민국 임시정부 수립보다 앞선 사건이에요.' },
+    { id:2, title:'대한민국 임시정부 수립', desc:'1919년 4월, 상하이에서 수립되었다.', hint:'3·1 운동 직후에 일어난 사건이에요.' },
+    { id:3, title:'8·15 광복', desc:'1945년, 일제강점기가 끝나고 광복을 맞았다.', hint:'임시정부 수립 이후 26년 뒤의 일이에요.' },
+    { id:4, title:'대한민국 정부 수립', desc:'1948년, 대한민국 정부가 정식 수립되었다.', hint:'광복 이후 3년 뒤의 일이에요.' },
+    { id:5, title:'6·25 전쟁 발발', desc:'1950년, 한국 전쟁이 시작되었다.', hint:'정부 수립 이후 2년 뒤의 일이에요.' }
+  ];
+  const correctOrder = [1,2,3,4,5];
+
+  let placed = [];
+  const track = document.getElementById('track');
+  const placeholder = document.getElementById('placeholder');
+  const pool = document.getElementById('pool');
+  const feedbackBox = document.getElementById('feedbackBox');
+
+  function renderPool(){
+    pool.innerHTML = '';
+    events.forEach(ev => {
+      const card = document.createElement('div');
+      card.className = 'event-card' + (placed.includes(ev.id) ? ' used' : '');
+      card.innerHTML = `<div class="title">${ev.title}</div><div class="desc">${ev.desc}</div>`;
+      card.addEventListener('click', () => {
+        if(placed.includes(ev.id)) return;
+        placed.push(ev.id);
+        renderAll();
+      });
+      pool.appendChild(card);
+    });
+  }
+
+  function renderTrack(){
+    track.querySelectorAll('.slot').forEach(s => s.remove());
+    placeholder.style.display = placed.length ? 'none' : 'block';
+    placed.forEach((id, i) => {
+      const ev = events.find(e => e.id === id);
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.innerHTML = `<span class="order-num">${i+1}</span><span>${ev.title}</span><span class="remove">✕</span>`;
+      slot.addEventListener('click', () => {
+        placed = placed.filter(pid => pid !== id);
+        renderAll();
+      });
+      track.appendChild(slot);
+    });
+  }
+
+  function renderAll(){ renderPool(); renderTrack(); feedbackBox.classList.remove('show'); }
+
+  document.getElementById('resetBtn').addEventListener('click', () => { placed = []; renderAll(); });
+
+  document.getElementById('checkBtn').addEventListener('click', () => {
+    if(placed.length < events.length){
+      feedbackBox.className = 'feedback-box show bad';
+      feedbackBox.textContent = `아직 ${events.length - placed.length}개의 사건을 더 배치해야 해요.`;
+      return;
+    }
+    const slots = track.querySelectorAll('.slot');
+    let firstWrongIdx = -1;
+    placed.forEach((id, i) => {
+      const isCorrect = id === correctOrder[i];
+      slots[i].classList.toggle('correct', isCorrect);
+      slots[i].classList.toggle('wrong', !isCorrect);
+      if(!isCorrect && firstWrongIdx === -1) firstWrongIdx = i;
+    });
+
+    if(firstWrongIdx === -1){
+      feedbackBox.className = 'feedback-box show good';
+      feedbackBox.textContent = '완벽해요! 모든 사건을 올바른 순서로 배치했어요. 🎉';
+    } else {
+      const wrongEvent = events.find(e => e.id === placed[firstWrongIdx]);
+      feedbackBox.className = 'feedback-box show bad';
+      feedbackBox.textContent = `${firstWrongIdx+1}번째 자리부터 순서가 달라요. 힌트: "${wrongEvent.title}" — ${wrongEvent.hint}`;
+    }
+  });
+
+  renderAll();
+</script>
+</body>
+</html>

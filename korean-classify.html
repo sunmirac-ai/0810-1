@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문장 성분 분류기 — 고등 국어</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg:#15161C; --card:#1D1F28; --ink:#EDEDF2; --muted:#8A8D9E;
+    --accent:#A78BFA; --accent-dim:rgba(167,139,250,0.14);
+    --subj:#6BB6FF; --pred:#FF8B6B; --obj:#FFD166; --mod:#6BFFB8;
+    --font-display:'Noto Serif KR',serif; --font-body:'PretendardVariable',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); }
+  .wrap{ max-width:600px; margin:0 auto; padding:20px 18px 60px; }
+  @media(min-width:900px){ .wrap{ max-width:780px; padding-top:40px; } }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 22px; }
+  .back{
+    font-family:var(--font-mono); font-size:12.5px; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid #2C2E3A;
+  }
+  .badge{ font-family:var(--font-mono); font-size:11px; background:var(--accent); color:#1B1330; padding:6px 12px; border-radius:6px; font-weight:700; }
+
+  h1{ font-family:var(--font-display); font-size: clamp(26px,6vw,34px); margin: 4px 0 8px; font-weight:700; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom: 28px; max-width:56ch; }
+
+  .panel{ background:var(--card); border-radius:var(--radius); padding:22px; border:1px solid #2A2C38; }
+
+  textarea{
+    width:100%; background:#12131A; border:1px solid #2C2E3A; border-radius:10px; color:var(--ink);
+    font-family:var(--font-body); font-size:16px; padding:14px 16px; resize:vertical; min-height:70px;
+  }
+  textarea:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .btn-row{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--font-mono); font-size:13px; padding:11px 18px; border-radius:8px; cursor:pointer; border:none;
+  }
+  .btn-primary{ background:var(--accent); color:#1B1330; font-weight:700; }
+  .btn-ghost{ background:transparent; border:1px solid #2C2E3A; color:var(--muted); }
+  .btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .result{ margin-top:24px; }
+  .sentence-view{
+    font-family:var(--font-display); font-size: clamp(20px,4.4vw,26px); line-height:2.2; padding: 10px 0;
+  }
+  .tag{
+    display:inline-block; padding: 2px 4px; border-radius:6px; position:relative;
+  }
+  .tag .part-label{
+    display:block; font-family:var(--font-mono); font-size:10px; text-align:center; margin-top:2px; font-weight:700;
+  }
+  .tag.subj{ background: rgba(107,182,255,0.16); } .tag.subj .part-label{ color:var(--subj); }
+  .tag.pred{ background: rgba(255,139,107,0.16); } .tag.pred .part-label{ color:var(--pred); }
+  .tag.obj{ background: rgba(255,209,102,0.16); } .tag.obj .part-label{ color:var(--obj); }
+  .tag.mod{ background: rgba(107,255,184,0.16); } .tag.mod .part-label{ color:var(--mod); }
+  .tag.etc{ color: var(--muted); }
+
+  .legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top:20px; font-family:var(--font-mono); font-size:11.5px; }
+  .legend span{ display:flex; align-items:center; gap:6px; color:var(--muted); }
+  .legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  .examples{ margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; }
+  .ex-chip{
+    font-family:var(--font-mono); font-size:11.5px; padding:7px 12px; border-radius:999px;
+    background:#12131A; border:1px solid #2C2E3A; color:var(--muted); cursor:pointer;
+  }
+  .ex-chip:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .explain{ margin-top:24px; background:var(--card); border:1px solid #2A2C38; border-radius:var(--radius); padding:18px 20px; }
+  .explain h3{ margin:0 0 8px; font-size:13px; font-family:var(--font-mono); color:var(--accent); }
+  .explain p{ margin:0; font-size:13px; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="../portfolio.html">← 메인으로</a>
+      <span class="badge">고등 1학년 · 국어</span>
+    </div>
+
+    <h1>문장 성분 분류기</h1>
+    <p class="sub">문장을 입력하면 조사 패턴을 분석해 주어·서술어·목적어·부속 성분을 자동으로 표시합니다.</p>
+
+    <div class="panel">
+      <textarea id="sentInput" placeholder="예) 나는 어제 학교에서 친구를 만났다">나는 어제 학교에서 친구를 만났다</textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="analyzeBtn">문장 분석하기</button>
+        <button class="btn btn-ghost" id="clearBtn">지우기</button>
+      </div>
+      <div class="examples">
+        <span class="ex-chip" data-s="그 강아지가 마당에서 빠르게 뛰어다닌다">예문 1</span>
+        <span class="ex-chip" data-s="동생은 매일 아침 우유를 마신다">예문 2</span>
+        <span class="ex-chip" data-s="우리는 도서관에서 시험 공부를 열심히 했다">예문 3</span>
+      </div>
+
+      <div class="result" id="result"></div>
+
+      <div class="legend">
+        <span><i style="background:var(--subj)"></i>주어(이/가/은/는)</span>
+        <span><i style="background:var(--pred)"></i>서술어(동사·형용사)</span>
+        <span><i style="background:var(--obj)"></i>목적어(을/를)</span>
+        <span><i style="background:var(--mod)"></i>부사어/관형어</span>
+      </div>
+    </div>
+
+    <div class="explain">
+      <h3>✦ AI 활용 방식</h3>
+      <p>실제 자연어처리(NLP) 엔진은 형태소 분석 후 품사와 문장 성분을 통계·규칙 기반으로 예측합니다. 이 데모는 그 원리를 단순화해, 조사(이/가/을/를 등)와 어미 패턴을 규칙으로 매칭해 성분을 추정합니다 — 학생이 문법 규칙을 직관적으로 체감하도록 설계했습니다.</p>
+    </div>
+  </div>
+
+<script>
+  const input = document.getElementById('sentInput');
+  const resultEl = document.getElementById('result');
+
+  const SUBJ_PARTICLES = ['이','가','은','는'];
+  const OBJ_PARTICLES = ['을','를'];
+  const MOD_PARTICLES = ['에서','에게','에','으로','로','과','와', '의'];
+  const MOD_ENDINGS = ['게','히','이']; // 부사형 어미(단순 추정)
+  const PRED_ENDINGS = ['다','요','까','네','자']; // 종결어미 추정
+
+  function classifyWord(word, isLast){
+    // 종결어미로 끝나면 서술어로 우선 판단
+    if(isLast && PRED_ENDINGS.some(e => word.endsWith(e))){
+      return 'pred';
+    }
+    for(const p of SUBJ_PARTICLES){
+      if(word.endsWith(p) && word.length > p.length) return 'subj';
+    }
+    for(const p of OBJ_PARTICLES){
+      if(word.endsWith(p) && word.length > p.length) return 'obj';
+    }
+    for(const p of MOD_PARTICLES){
+      if(word.endsWith(p) && word.length > p.length) return 'mod';
+    }
+    if(MOD_ENDINGS.some(e => word.endsWith(e)) && word.length <= 4) return 'mod';
+    return 'etc';
+  }
+
+  const LABELS = { subj:'주어', pred:'서술어', obj:'목적어', mod:'부속', etc:'' };
+
+  function analyze(){
+    const text = input.value.trim();
+    if(!text){ resultEl.innerHTML = ''; return; }
+    const words = text.replace(/[.?!]/g,'').split(/\s+/);
+    const html = words.map((w, i) => {
+      const type = classifyWord(w, i === words.length-1);
+      const cls = type === 'etc' ? 'tag etc' : `tag ${type}`;
+      const label = LABELS[type] ? `<span class="part-label">${LABELS[type]}</span>` : '';
+      return `<span class="${cls}">${w}${label}</span>`;
+    }).join(' ');
+    resultEl.innerHTML = `<div class="sentence-view">${html}</div>`;
+  }
+
+  document.getElementById('analyzeBtn').addEventListener('click', analyze);
+  document.getElementById('clearBtn').addEventListener('click', () => { input.value=''; resultEl.innerHTML=''; input.focus(); });
+  document.querySelectorAll('.ex-chip').forEach(chip => {
+    chip.addEventListener('click', () => { input.value = chip.dataset.s; analyze(); });
+  });
+
+  analyze();
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>탄소발자국 추적기 — 중등 과학</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css"></script>
+<style>
+  :root{
+    --bg:#F0F6F4; --card:#ffffff; --ink:#132A24; --muted:#5D7A72;
+    --accent:#1E8A6E; --accent-dim:#E7F4EF; --warn:#E0663F;
+    --font-display:'Space Grotesk',sans-serif; --font-body:'PretendardVariable',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); }
+  .wrap{ max-width:560px; margin:0 auto; padding:20px 18px 60px; }
+  @media(min-width:900px){ .wrap{ max-width:760px; padding-top:40px; } }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px; }
+  .back{
+    font-family:var(--font-mono); font-size:12.5px; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid #D6E6E1;
+  }
+  .badge{ font-family:var(--font-mono); font-size:11px; background:var(--accent); color:#fff; padding:6px 12px; border-radius:999px; font-weight:700; }
+
+  h1{ font-family:var(--font-display); font-size: clamp(28px,6vw,38px); margin: 4px 0 8px; font-weight:700; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom: 28px; max-width:56ch; }
+
+  .grid2{ display:grid; grid-template-columns:1fr; gap:18px; }
+  @media(min-width:760px){ .grid2{ grid-template-columns: 1.1fr 0.9fr; align-items:start; } }
+
+  .panel{ background:var(--card); border-radius:var(--radius); padding:22px; border:1px solid #E1EDE9; }
+  .panel h2{ font-family:var(--font-display); font-size:17px; margin:0 0 16px; }
+
+  .item{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding: 14px 0; border-bottom: 1px solid #EEF3F1;
+  }
+  .item:last-child{ border-bottom:none; }
+  .item .label{ font-size:14px; }
+  .item .label .unit{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:2px; }
+
+  input[type=range]{ width: 120px; accent-color: var(--accent); }
+  .val{ font-family:var(--font-mono); font-size:13px; min-width:52px; text-align:right; color:var(--accent); font-weight:700; }
+
+  .result-num{ font-family:var(--font-display); font-size: 46px; font-weight:700; color: var(--accent); }
+  .result-num sub{ font-family:var(--font-mono); font-size:14px; color:var(--muted); }
+  .result-bar{ height:10px; border-radius:999px; background:var(--accent-dim); overflow:hidden; margin:16px 0; }
+  .result-bar-fill{ height:100%; background:var(--accent); border-radius:999px; transition: width .4s ease; }
+  .result-desc{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+
+  .tip-list{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .tip{
+    display:flex; gap:10px; align-items:flex-start; font-size:13px; background:var(--accent-dim);
+    padding:12px 14px; border-radius:12px; color:#1C4A3C;
+  }
+  .tip .mark{ color:var(--accent); font-weight:700; }
+
+  .explain{ margin-top:24px; background:#fff; border:1px solid #E1EDE9; border-radius:var(--radius); padding:18px 20px; }
+  .explain h3{ margin:0 0 8px; font-size:13px; font-family:var(--font-mono); color:var(--accent); }
+  .explain p{ margin:0; font-size:13px; color:var(--muted); line-height:1.6; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="../portfolio.html">← 메인으로</a>
+      <span class="badge">중등 1학년 · 과학</span>
+    </div>
+
+    <h1>탄소발자국 추적기 🌿</h1>
+    <p class="sub">일주일 동안의 생활 습관을 입력하면, 탄소 배출 패턴을 분석해 나만의 감축 제안을 생성합니다.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <h2>이번 주 나의 생활</h2>
+        <div class="item">
+          <div class="label">자동차 이동 시간<span class="unit">일주일 총합 (시간)</span></div>
+          <input type="range" id="car" min="0" max="20" value="4">
+          <span class="val" id="carVal">4h</span>
+        </div>
+        <div class="item">
+          <div class="label">육류 섭취 횟수<span class="unit">일주일 끼니 수</span></div>
+          <input type="range" id="meat" min="0" max="21" value="7">
+          <span class="val" id="meatVal">7회</span>
+        </div>
+        <div class="item">
+          <div class="label">전자기기 사용 시간<span class="unit">하루 평균 (시간)</span></div>
+          <input type="range" id="screen" min="0" max="12" value="5">
+          <span class="val" id="screenVal">5h</span>
+        </div>
+        <div class="item">
+          <div class="label">일회용품 사용 횟수<span class="unit">일주일 총합</span></div>
+          <input type="range" id="plastic" min="0" max="20" value="6">
+          <span class="val" id="plasticVal">6개</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>분석 결과</h2>
+        <div class="result-num" id="resultNum">0 <sub>kg CO₂ / 주</sub></div>
+        <div class="result-bar"><div class="result-bar-fill" id="resultBar" style="width:0%"></div></div>
+        <p class="result-desc" id="resultDesc">슬라이더를 움직이면 실시간으로 계산돼요.</p>
+
+        <div class="tip-list" id="tipList"></div>
+      </div>
+    </div>
+
+    <div class="explain">
+      <h3>✦ AI 활용 방식</h3>
+      <p>입력된 4가지 생활 데이터의 조합 패턴을 분석해, 가장 배출 비중이 큰 항목을 자동으로 찾아내고 그에 맞는 감축 제안을 우선순위대로 생성합니다. 실제 서비스에서는 여기에 개인 이동 기록·구매 데이터를 학습한 모델이 활용됩니다.</p>
+    </div>
+  </div>
+
+<script>
+  const carEl = document.getElementById('car');
+  const meatEl = document.getElementById('meat');
+  const screenEl = document.getElementById('screen');
+  const plasticEl = document.getElementById('plastic');
+
+  const carVal = document.getElementById('carVal');
+  const meatVal = document.getElementById('meatVal');
+  const screenVal = document.getElementById('screenVal');
+  const plasticVal = document.getElementById('plasticVal');
+
+  const resultNum = document.getElementById('resultNum');
+  const resultBar = document.getElementById('resultBar');
+  const resultDesc = document.getElementById('resultDesc');
+  const tipList = document.getElementById('tipList');
+
+  // 간단한 배출계수(교육용 예시 수치)
+  const FACTORS = { car: 8.5, meat: 6.0, screen: 0.6, plastic: 1.2 };
+  const MAX_SCORE = 20*FACTORS.car + 21*FACTORS.meat + 12*7*FACTORS.screen + 20*FACTORS.plastic;
+
+  function calc(){
+    const car = +carEl.value, meat = +meatEl.value, screen = +screenEl.value, plastic = +plasticEl.value;
+    carVal.textContent = car + 'h';
+    meatVal.textContent = meat + '회';
+    screenVal.textContent = screen + 'h';
+    plasticVal.textContent = plastic + '개';
+
+    const contributions = {
+      car: car*FACTORS.car,
+      meat: meat*FACTORS.meat,
+      screen: screen*7*FACTORS.screen,
+      plastic: plastic*FACTORS.plastic
+    };
+    const total = Object.values(contributions).reduce((a,b)=>a+b,0);
+    resultNum.innerHTML = Math.round(total) + ' <sub>kg CO₂ / 주</sub>';
+    const pct = Math.min(100, Math.round((total/MAX_SCORE)*100));
+    resultBar.style.width = pct + '%';
+
+    let level, desc;
+    if(pct < 33){ level='낮음'; desc='또래 평균보다 낮은 배출 패턴이에요. 지금 습관을 잘 유지해보세요.'; }
+    else if(pct < 66){ level='보통'; desc='평균적인 수준이에요. 가장 비중이 큰 항목부터 줄여보면 효과가 커요.'; }
+    else{ level='높음'; desc='평균보다 배출량이 많은 편이에요. 아래 제안을 참고해보세요.'; }
+    resultDesc.textContent = `배출 수준: ${level} — ${desc}`;
+
+    // 가장 큰 기여 항목 순으로 정렬해 제안 생성
+    const labelMap = {
+      car: { name:'자동차 이동', tip:'가까운 거리는 도보나 자전거로 대체해보세요.' },
+      meat: { name:'육류 섭취', tip:'일주일에 하루는 채식 식단을 시도해보세요.' },
+      screen: { name:'전자기기 사용', tip:'사용하지 않는 화면은 절전 모드로 전환해보세요.' },
+      plastic: { name:'일회용품 사용', tip:'텀블러·장바구니 같은 다회용품으로 바꿔보세요.' }
+    };
+    const sorted = Object.entries(contributions).sort((a,b)=>b[1]-a[1]).slice(0,2);
+    tipList.innerHTML = sorted.map(([key]) => `
+      <div class="tip"><span class="mark">▲</span><span><b>${labelMap[key].name}</b> 비중이 가장 큽니다 — ${labelMap[key].tip}</span></div>
+    `).join('');
+  }
+
+  [carEl, meatEl, screenEl, plasticEl].forEach(el => el.addEventListener('input', calc));
+  calc();
+</script>
+</body>
+</html>
